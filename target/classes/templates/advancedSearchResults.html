@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Animal Crossing</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" th:href="@{/css/index.css}" >
+  <link rel="stylesheet" type="text/css" th:href="@{/css/popup.css}">
+
+
+</head>
+<body>
+<header>
+  <img class="image" src="../static/images/Header.png" th:src="@{images/Header.png}" alt="Header">
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #5c915c;">
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav navbar-center">
+        <a class="navbar-brand" th:href="@{index}">Home</a>
+        <a class="nav-item nav-link" th:href="@{allConstruction}">Construction</a>
+        <a class="nav-item nav-link" th:href="@{allFloors}">Floors</a>
+        <a class="nav-item nav-link" th:href="@{allFossils}">Fossils</a>
+        <a class="nav-item nav-link" th:href="@{allHeadwear}">Headwear</a>
+        <a class="nav-item nav-link" th:href="@{allMusic}">Music</a>
+        <a class="nav-item nav-link" th:href="@{allReactions}">Reactions</a>
+        <a class="nav-item nav-link" th:href="@{allVillagers}">Villagers</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<main>
+  <div class="table" style="text-align: center">
+    <div th:each="result, row: ${results}" th:with="numList=${#strings.listSplit('3,2,1,0', ',')}" th:if="${row.count % 4 == 0 or row.last}" class="span3 row" >
+      <span th:each="num : ${numList}" th:with="resultIndex=(${row.index} - ${num})" th:if="${row.count % 4 == 0}" class="col">
+        <span th:data-type="${category}" th:data-id="${results[resultIndex].getUniqueEntryId()}"></span>
+        <img  width="150" height="200" th:src="${results[resultIndex].getImage()}">
+        <div  th:text="${results[resultIndex].getName()}"></div>
+       </span>
+      <!-- Show the remainders (eg, if there are 9 items, the last row will have one item in it) -->
+<!--      <span th:each="num : ${numList}" th:with="resultIndex=(${row.index} - ${num})" th:if="${row.last} and ${row.count % 4 != 0} and ${num &lt; row.count % 4}" >-->
+<!--        <span th:data-id="${results[resultIndex].getUniqueEntryId()}"></span>-->
+<!--        <img  th:src="${results[resultIndex].getImage()}">-->
+<!--        <div  th:text="${results[resultIndex].getName()}">-->
+<!--        </div>-->
+<!--      </span>-->
+    </div>
+  </div>
+</main>
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div class="pop-up-info">
+      <img class="image">
+      <div class="info">
+        <h1> </h1>
+        <h2> </h2>
+        <h3> </h3>
+      </div>
+    </div>
+  </div>
+</div>
+<script
+        src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+        crossorigin="anonymous"></script>
+<script>
+  // Get the modal
+  var modal = document.getElementById("myModal");
+  // Get the button that opens the modal
+  var col = document.getElementsByClassName("col");
+  // Get the <span> element that closes the modal
+  var span = document.getElementsByClassName("close")[0];
+
+  // When the user clicks the button, open the modal
+  for (i = 0; i < col.length; i++){
+    col[i].onclick = function() {   modal.style.display = "block"; }
+  }
+  // When the user clicks on <span> (x), close the modal
+  span.onclick = function() {   modal.style.display = "none"; }
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+
+  }
+  $(document).ready(function () { //once page has been completely rendered
+    $(".col").click(function() {
+      $.get("/find" + $(this).find('span').attr('data-type'), {
+        "id": $(this).find('span').attr('data-id'),
+      }).done(function (information) {
+        $('.modal-content h1').text(information.name);
+        if (information.hasOwnProperty("purchasePrice")){
+          $('.modal-content h2').text(information.purchasePrice + " Bells");
+        } else if (information.hasOwnProperty("species")) {
+          $('.modal-content h2').text("Species: " + information.species);
+        }
+        else {
+          $('.modal-content h2').text("Notes: " + information.sourceNotes);
+        }
+        if (information.hasOwnProperty("source")){
+          $('.modal-content h3').text("Source: " + information.source);
+        } else {
+          $('.modal-content h3').text("Personality: " + information.personality);
+        }
+        if (information.hasOwnProperty('image')){
+          $('.modal-content .image').attr("src", information.image);
+        } else {
+          $('.modal-content .image').attr("src", information.storageImage);
+        }
+      });
+    });
+
+    $('.overlay, .close').click(function () {
+      $('.overlay, .popup').hide();
+    });
+  });
+
+</script>
+
+</body>
+</html>
+
+</body>
+</html>
